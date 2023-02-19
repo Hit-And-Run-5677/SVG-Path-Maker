@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>SVG Path Generator</title>
+  <style type="text/css" media="all">
+    *{
+      margin: 0; padding: 0;
+      box-sizing: border-box;
+      font-family: arial;
+    }
+    body, html {
+      height: 100%; width: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+    .editor{
+      width: 100%; height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      background: black;
+      color: white;
+    }
+    .editor svg{
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: none;
+      background: white;
+    }
+    .editor.active svg{
+      display: block;
+    }
+    .top{
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      font-size: 0.7rem;
+      padding: 5px;
+      display: flex;
+      justify-content: space-between;
+      background: #333;
+      color: #ddd;
+      align-items: center;
+      z-index: 10;
+    }
+    .top .title{
+      font-size: .9rem;
+    }
+    .top .button{
+      padding: 2px 3px;
+      background: #0f0;
+      color: #f0f;
+      text-decoration: underline;
+      cursor: pointer;
+      border-radius: 2px;
+      box-shadow: 0px 0px 3px black;
+    }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <div class="title">SVG Path Generator by Ayush</div>
+    <div class="button" id="copy">Copy SVG Code</div>
+    <div class="button" id="clear">Clear</div>
+  </div>
+  <div class="editor" id="editor">
+    <h1>Path Editor <br> Swipe Here</h1>
+    <svg id="svg"></svg>
+  </div>
+  <script type="text/javascript" charset="utf-8">
+    svg.setAttribute("viewBox", `0 0 ${innerWidth} ${innerHeight}`);
+    svg.setAttribute("height", innerHeight);
+    svg.setAttribute("width", innerWidth);
+    
+    editor.ontouchstart = e => createNewPath({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+    editor.ontouchmove = e => editPath({ x: e.touches[0].clientX, y: e.touches[0].clientY });;
+    editor.onmousedown = createNewPath;
+    editor.onmousemove = editPath;
+    
+    let curPath;
+    
+    function createNewPath(e){
+      if(!editor.classList.contains("active")){
+        editor.classList.add("active")
+      }
+      curPath = document.createElementNS('http://www.w3.org/2000/svg', "path");
+      curPath.setAttribute("d", `M${e.x} ${e.y} L${e.x} ${e.y}`);
+      curPath.setAttribute("stroke", "white")
+      
+      svg.append(curPath)
+    }
+    function editPath(e){
+      let d = curPath.getAttribute("d");
+      d = d.substring(0, d.length - 2);
+      const splitBySpace = d.split(" ");
+      const last = [splitBySpace.at(-2).substring(1, splitBySpace.at(-2).length), splitBySpace.at(-1)]
+      curPath.setAttribute("d", d + ` M${last.join(" ")} L${e.x} ${e.y} Z`)
+    }
+    
+    clear.onclick = e => {
+      svg.innerHTML = ""
+    }
+    copy.onclick = e => {
+      const inp = document.createElement("input");
+      inp.value = "a";
+      inp.style.opactity = 0;
+      
+      document.body.append(inp);
+      inp.focus();
+      inp.setSelectionRange(0, 1)
+      
+      navigator.clipboard.writeText(svg.outerHTML);
+      setTimeout(() => {
+        inp.remove()
+        alert("Copied")
+      }, 0)
+    }
+  </script>
+</body>
+</html>
